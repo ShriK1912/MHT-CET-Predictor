@@ -1,0 +1,1093 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RightWay Counselling Center - MHT-CET 2025 College Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+       
+
+        :root {
+            --color-primary: #facc15; /* Yellow 400 */
+            --color-primary-light: #fef08a; /* Yellow 200 */
+            --color-primary-dark: #eab308; /* Yellow 500 */
+            --color-accent: #fbbf24; /* Amber 400 */
+            
+            --bg-light: #ffffff;
+            --bg-dark: #121212;
+            --card-bg-light: #fefde8;
+            --card-bg-dark: #1e1e1e;
+            --text-light: #1f2937;
+            --text-dark: #f9fafb;
+            --border-light: #e5e7eb;
+            --border-dark: #374151;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            transition: background-color 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        
+        /* Particle Background */
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        body.dark-mode #particle-canvas {
+            opacity: 0.2;
+        }
+
+        /* Logo Splash Screen and Animation */
+        #logo-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            z-index: 1000;
+            transition: all 1.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); /* EaseInBack for zoom */
+        }
+
+        #splash-logo {
+            width: 250px;
+            height: auto;
+            transition: all 1.5s cubic-bezier(0.6, -0.28, 0.735, 0.045);
+        }
+
+        body.loaded #logo-container {
+            top: 40px;
+            left: auto;
+            right: 40px;
+            transform: translate(0, 0) scale(0.3);
+        }
+
+        body.loaded #splash-logo {
+             width: 300px; /* Adjust final logo size */
+        }
+        
+        /* Main Content Fade-in */
+        #main-content {
+            opacity: 0;
+            transition: opacity 1s ease-in-out 0.8s; /* Delay to sync with logo animation */
+        }
+        
+        body.loaded #main-content {
+            opacity: 1;
+        }
+
+        /* Main Card Styles */
+        .card {
+            background-color: rgba(254, 253, 232, 0.8); /* Semi-transparent */
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-light);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transform: perspective(1000px);
+        }
+
+        body.dark-mode .card {
+            background-color: rgba(30, 30, 30, 0.7); /* Semi-transparent */
+            border-color: var(--border-dark);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.01) rotateX(2deg);
+            box-shadow: 0 25px 50px -12px rgba(250, 204, 21, 0.25);
+        }
+
+        /* Form Elements */
+        .input-field, .select2-container--default .select2-selection--multiple {
+            background-color: rgba(255, 255, 255, 0.7) !important;
+            border: 1px solid var(--border-light) !important;
+            border-radius: 0.75rem !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05);
+        }
+
+        body.dark-mode .input-field, body.dark-mode .select2-container--default .select2-selection--multiple {
+            background-color: rgba(42, 42, 42, 0.7) !important;
+            border-color: var(--border-dark) !important;
+            color: var(--text-dark) !important;
+        }
+
+        .input-field:focus, .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: var(--color-primary) !important;
+            box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.3) !important;
+        }
+        
+        /* Select2 Customization */
+        .select2-container--default .select2-selection--multiple {
+            min-height: 50px !important;
+            padding: 6px 12px;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice {
+            background: linear-gradient(135deg, var(--color-primary), var(--color-accent)) !important;
+            border: none !important;
+            color: #1f2937 !important;
+            border-radius: 0.5rem !important;
+            padding: 6px 12px !important;
+            margin-top: 4px !important;
+            font-weight: 600;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .select2-container--default .select2-selection--multiple .select2-selection__choice:hover {
+             transform: scale(1.05);
+        }
+
+        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+            color: #1f2937 !important;
+            margin-right: 8px !important;
+            font-weight: 700;
+        }
+        
+        .select2-dropdown {
+            border-radius: 1rem !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            border: 1px solid var(--border-light) !important;
+            background-color: var(--bg-light) !important;
+        }
+        
+        body.dark-mode .select2-dropdown {
+            border-color: var(--border-dark) !important;
+            background-color: var(--card-bg-dark) !important;
+        }
+        
+        .select2-results__option {
+            color: var(--text-light);
+        }
+        
+        body.dark-mode .select2-results__option {
+            color: var(--text-dark);
+        }
+
+        .select2-results__option--highlighted {
+            background-color: var(--color-primary) !important;
+            color: #1f2937 !important;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+            color: #1f2937;
+            font-weight: 700;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px 0 rgba(250, 204, 21, 0.3);
+            transition: all 0.3s ease-in-out;
+            transform: scale(1);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px 0 rgba(250, 204, 21, 0.4);
+        }
+        
+        .btn-export {
+            background: linear-gradient(135deg, #34d399, #10b981);
+            color: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 15px 0 rgba(16, 185, 129, 0.3);
+            transition: all 0.3s ease-in-out;
+        }
+        
+        .btn-export:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.4);
+        }
+        
+        /* Table Styles */
+        .table-container {
+            border-radius: 1rem;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-light);
+        }
+        
+        body.dark-mode .table-container {
+            border-color: var(--border-dark);
+        }
+        
+        .table-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background-color: var(--card-bg-light);
+            border-bottom: 2px solid var(--color-primary);
+        }
+        
+        body.dark-mode .table-header {
+             background-color: var(--card-bg-dark);
+        }
+        
+        .table-row {
+            transition: background-color 0.3s ease;
+        }
+
+        .table-row:nth-child(even) {
+            background-color: transparent;
+        }
+        
+        .table-row:nth-child(odd) {
+             background-color: rgba(254, 250, 252, 0.5);
+        }
+        
+        body.dark-mode .table-row:nth-child(even) {
+            background-color: transparent;
+        }
+
+        body.dark-mode .table-row:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+        
+        .table-row:hover {
+            background-color: var(--color-primary-light);
+        }
+        
+        body.dark-mode .table-row:hover {
+            background-color: #333;
+        }
+
+        /* Category Badges */
+        .category-badge {
+            padding: 0.35rem 0.85rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            border: 1px solid;
+        }
+
+        /* Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        #predictionForm, #resultsSection, #roundSelectorContainer {
+            animation-delay: 0.2s;
+        }
+        
+        .table-row-reveal {
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: tableRowReveal 0.5s ease-out forwards;
+        }
+
+        @keyframes tableRowReveal {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Dark Mode Toggle */
+        #themeToggle {
+            position: fixed;
+            top: 1.5rem;
+            left: 1.5rem; /* Moved to left */
+            z-index: 999;
+            background: var(--card-bg-light);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        body.dark-mode #themeToggle {
+            background: var(--card-bg-dark);
+            color: var(--text-dark);
+            border-color: var(--border-dark);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: transparent;
+            color: var(--text-light);
+        }
+        
+        body.dark-mode footer {
+            color: var(--text-dark);
+        }
+        /* Branch Preference Styles */
+.branch-preference-item {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+    color: #1f2937;
+    padding: 8px 12px;
+    margin: 4px;
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: move;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.branch-preference-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.branch-preference-item .remove-btn {
+    margin-left: 8px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.branch-preference-item .remove-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.branch-preference-item .priority-number {
+    background: rgba(255, 255, 255, 0.8);
+    color: #1f2937;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 8px;
+}
+
+#branchPreferences.dragging {
+    border-color: var(--color-primary);
+    background-color: rgba(250, 204, 21, 0.1);
+}
+
+    </style>
+</head>
+<body class="">
+    <canvas id="particle-canvas"></canvas>
+
+    <div id="logo-container">
+        <img id="splash-logo" src="no bg (2).png" alt="RightWay Counselling Logo">
+    </div>
+
+    <div id="main-content">
+        <button id="themeToggle" class="btn-primary p-3 rounded-full shadow-lg transition">
+            <svg id="theme-icon-light" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        </button>
+        
+        <div class="min-h-screen flex flex-col container mx-auto px-4 py-8 md:py-12">
+            <header class="text-center mb-12 fade-in-up pt-20">
+                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-yellow-400 to-amber-600">
+                        MHT-CET 2025 College Predictor
+                    </span>
+                </h1>
+                <p class="mt-4 text-lg text-gray-600 dark:text-gray-300">
+                    By RightWay Counselling Center
+                </p>
+            </header>
+
+            <main class="flex-grow">
+                <!-- Round Selector -->
+                <div id="roundSelectorContainer" class="hidden card p-6 mb-8 fade-in-up">
+                    <label for="roundSelector" class="block text-lg font-semibold mb-3">Select CAP Round</label>
+                    <select id="roundSelector" class="input-field w-full px-5 py-3 text-base"></select>
+                </div>
+
+                <!-- Prediction Form -->
+                <div id="predictionForm" class="card p-8 md:p-12 mb-10 hidden fade-in-up">
+                    <h2 class="text-3xl font-bold mb-8 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Prediction Parameters
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Rank / Percentile Input -->
+                        <div>
+                            <label for="rank" class="block text-base font-medium mb-2">Your Rank (Merit No.)</label>
+                            <input type="number" id="rank" min="1" step="1" placeholder="e.g., 12345" class="input-field w-full px-5 py-3 text-lg">
+                            <p class="mt-2 text-sm text-gray-500">Enter your official MHT-CET merit rank.</p>
+                        </div>
+                         <div>
+                            <label for="percentile" class="block text-base font-medium mb-2">Your Percentile</label>
+                            <div class="relative">
+                                <input type="number" id="percentile" min="0" max="100" step="0.01" placeholder="e.g., 98.7654" class="input-field w-full px-5 py-3 text-lg">
+                                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                                    <span class="text-gray-500 font-medium">%</span>
+                                </div>
+                            </div>
+                            <p class="mt-2 text-sm text-gray-500">Alternatively, enter your percentile.</p>
+                        </div>
+                        
+                        <!-- Category Selection -->
+                        <div>
+                            <label for="caste" class="block text-base font-medium mb-2">Category</label>
+                            <select id="caste" class="w-full" multiple data-placeholder="Select your category/categories"></select>
+                        </div>
+                        
+                        <!-- Branch Selection -->
+<div>
+    <label for="branch" class="block text-base font-medium mb-2">Available Branches</label>
+    <select id="branch" class="w-full" multiple data-placeholder="e.g., Computer Engineering"></select>
+    <p class="mt-2 text-sm text-gray-500">Select branches to add to your preference list.</p>
+</div>
+
+<!-- Branch Preference Order -->
+<div class="md:col-span-2">
+    <label class="block text-base font-medium mb-2">Branch Preference Order</label>
+    <div id="branchPreferences" class="min-h-[120px] border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-600">
+        <div class="text-center text-gray-500 dark:text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <p>Select branches from above to set your preference order</p>
+            <p class="text-sm">Drag to reorder or click to remove</p>
+        </div>
+    </div>
+    <p class="mt-2 text-sm text-gray-500">Drag branches to reorder your preferences. Higher priority branches will be shown first in results.</p>
+</div>
+                        
+                        <!-- City Selection -->
+                        <div class="md:col-span-2">
+                            <label for="city" class="block text-base font-medium mb-2">Preferred Cities</label>
+                            <select id="city" class="w-full" multiple data-placeholder="e.g., Pune, Mumbai"></select>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-10 flex justify-center">
+                        <button id="predictBtn" class="btn-primary py-4 px-10 rounded-xl shadow-lg flex items-center text-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7.014A8.003 8.003 0 0121 12c0 3-1.5 5.5-3.343 7.343z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V3m0 18v-3" />
+                            </svg>
+                            Predict My Colleges
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Results Section -->
+                <div id="resultsSection" class="hidden fade-in-up">
+                    <div class="card p-8 md:p-12 mb-10">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+                            <div>
+                                <h2 class="text-3xl font-bold flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mr-3 text-yellow-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Predicted Colleges
+                                </h2>
+                                <p class="mt-2 ml-11 text-gray-600 dark:text-gray-400">Based on your selection criteria.</p>
+                            </div>
+                            <div class="flex items-center mt-6 md:mt-0">
+                                <span id="resultCount" class="bg-yellow-100 text-yellow-800 text-base font-semibold px-5 py-2 rounded-full mr-5"></span>
+                                <button id="exportBtn" class="btn-export py-3 px-6 rounded-xl flex items-center font-semibold">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                    </svg>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="table-container overflow-x-auto">
+                            <table class="min-w-full">
+                                <thead class="table-header">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">#</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">College Name</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Branch</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">City</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Category</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Cutoff %ile</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Cutoff Rank</th>
+                                        <th scope="col" class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">Gap</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="resultsTable"></tbody>
+                            </table>
+                        </div>
+                        
+                        <div id="noResults" class="hidden py-20 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 mx-auto text-gray-400 mb-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 class="text-2xl font-medium mb-3">No Matching Colleges Found</h3>
+                            <p class="text-gray-500 max-w-md mx-auto">Try adjusting your search criteria. You might have a better chance in subsequent rounds!</p>
+                        </div>
+                    </div>
+                </div>
+                
+            </main>
+        </div>
+
+        <footer class="py-6 px-6 mt-12">
+            <div class="container mx-auto text-center">
+                <p class="text-sm">&copy; 2025 RightWay Counselling Center. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // --- Global Variables ---
+        const roundFiles = {
+            "Round 1": "CAP2024_CUTOFF_R1.xlsx",
+            "All India Round": "JEE CUTOFF.xlsx",
+            "Round 3": "mht_cet_colleges_with_districts.xlsx",
+            "Round 2": "CAP2024_CUTOFF_R2.xlsx"
+        };
+        let roundData = {};
+        let currentRound = null;
+        let collegeData = [];
+        let uniqueCategories = new Set();
+        let uniqueBranches = new Set();
+        let uniqueCities = new Set();
+        let synth;
+        let branchPreferences = [];
+        let draggedElement = null;
+        let globalBranchPriorityMap = {};
+
+        // --- Core Functions ---
+        
+        /**
+         * Initializes the application on DOM content load.
+         * Sets up event listeners and fetches initial data.
+         */
+        document.addEventListener('DOMContentLoaded', function() {
+            // Start intro animation
+            setTimeout(() => {
+                document.body.classList.add('loaded');
+            }, 500);
+
+            initializeTheme();
+            initializeSelect2();
+            setupEventListeners();
+            fetchAllRoundsData();
+            initializeAudio();
+            initializeParticleBackground();
+        });
+
+        /**
+         * Fetches data for all CAP rounds.
+         */
+        function fetchAllRoundsData() {
+            const roundNames = Object.keys(roundFiles);
+            let loadedCount = 0;
+            roundNames.forEach(round => {
+                fetch(roundFiles[round])
+                    .then(response => {
+                        if (!response.ok) throw new Error(`Network response was not ok for ${round}`);
+                        return response.arrayBuffer();
+                    })
+                    .then(data => {
+                        const workbook = XLSX.read(new Uint8Array(data), { type: 'array' });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        roundData[round] = XLSX.utils.sheet_to_json(worksheet);
+                        loadedCount++;
+                        if (loadedCount === roundNames.length) {
+                            populateRoundSelector();
+                            document.getElementById('roundSelectorContainer').classList.remove('hidden');
+                            document.getElementById('predictionForm').classList.remove('hidden');
+                        }
+                    })
+                    .catch(err => {
+                        console.error(`Failed to load ${roundFiles[round]}:`, err);
+                        alert(`Error: Could not load data for ${round}. Please check the file path and ensure it's accessible.`);
+                    });
+            });
+        }
+
+        /**
+         * Populates the round selector dropdown.
+         */
+        function populateRoundSelector() {
+            const roundSelector = document.getElementById('roundSelector');
+            roundSelector.innerHTML = ''; 
+            Object.keys(roundData).forEach(round => {
+                const option = document.createElement('option');
+                option.value = round;
+                option.textContent = round;
+                roundSelector.appendChild(option);
+            });
+            
+            currentRound = Object.keys(roundData)[0];
+            roundSelector.value = currentRound;
+            updateFormForCurrentRound();
+        }
+
+        /**
+         * Updates form dropdowns based on the selected CAP round.
+         */
+        function updateFormForCurrentRound() {
+            collegeData = roundData[currentRound] || [];
+            
+            uniqueCategories.clear();
+            uniqueBranches.clear();
+            uniqueCities.clear();
+            
+            collegeData.forEach(college => {
+                if (college.Category) uniqueCategories.add(college.Category);
+                if (college.Branch) uniqueBranches.add(college.Branch);
+                if (college.City) uniqueCities.add(college.City);
+            });
+            
+            populateDropdown('caste', Array.from(uniqueCategories));
+            populateDropdown('branch', Array.from(uniqueBranches));
+            populateDropdown('city', Array.from(uniqueCities));
+        }
+
+        /**
+         * Populates a Select2 dropdown with options.
+         */
+        function populateDropdown(id, options) {
+            const select = $(`#${id}`);
+            select.empty(); 
+            
+            options.sort().forEach(option => {
+                const optionElement = new Option(option, option, false, false);
+                select.append(optionElement);
+            });
+            
+            select.trigger('change');
+        }
+
+        /**
+         * Main prediction logic.
+         */
+         function predictColleges() {
+    const rank = parseInt(document.getElementById('rank').value);
+    const percentile = parseFloat(document.getElementById('percentile').value);
+    const useRank = !isNaN(rank) && rank > 0;
+    const usePercentile = !isNaN(percentile) && percentile >= 0 && percentile <= 100;
+
+    if (!useRank && !usePercentile) {
+        alert('Please enter a valid Rank or Percentile to get predictions.');
+        return;
+    }
+
+    const selectedCategories = $('#caste').val();
+    const selectedCities = $('#city').val();
+
+    // Use branch preferences for filtering and sorting
+    const selectedBranches = branchPreferences.map(item => item.branch);
+    const branchPriorityMap = {};
+    branchPreferences.forEach((item, index) => {
+        branchPriorityMap[item.branch] = index + 1;
+    });
+
+    let filteredColleges = collegeData.filter(college => {
+        if (useRank) {
+            const collegeCutoff = parseInt(college['Merit Cutoff']);
+            if (isNaN(collegeCutoff) || rank > collegeCutoff) return false;
+        } else {
+            const collegePercentile = parseFloat(college['Percentile']);
+            if (isNaN(collegePercentile) || percentile < collegePercentile) return false;
+        }
+
+        if (selectedCategories.length > 0 && !selectedCategories.includes(college.Category)) return false;
+        if (selectedBranches.length > 0 && !selectedBranches.includes(college.Branch)) return false;
+        if (selectedCities.length > 0 && !selectedCities.includes(college.City)) return false;
+
+        return true;
+    });
+    console.log('Filtered colleges:', filteredColleges.length);
+console.log('Sample college data:', collegeData[0]);
+console.log('Branch preferences:', branchPreferences);
+
+    // Sort by branch priority first, then by rank/percentile
+    // Sort by branch preference priority first, then by rank/percentile
+filteredColleges.sort((a, b) => {
+    // First sort by branch preference
+    const prefA = branchPreferences[a.Branch] || 999;
+    const prefB = branchPreferences[b.Branch] || 999;
+    
+    if (prefA !== prefB) {
+        return prefA - prefB;
+    }
+    
+    // Then sort by rank/percentile
+    if (useRank) {
+        const rankA = parseInt(a['Merit Cutoff'] || a.MeritCutoff);
+        const rankB = parseInt(b['Merit Cutoff'] || b.MeritCutoff);
+        return rankA - rankB;
+    } else {
+        const percA = parseFloat(a.Percentile || a['Percentile']);
+        const percB = parseFloat(b.Percentile || b['Percentile']);
+        return percB - percA; // Higher percentile is better
+    }
+});
+
+    displayResults(filteredColleges, useRank ? rank : null, usePercentile ? percentile : null, branchPriorityMap);
+}
+
+        /**
+         * Displays the prediction results.
+         */
+        
+        function displayResults(colleges, studentRank, studentPercentile, branchPriorityMap) {
+            const resultsTableBody = document.getElementById('resultsTable');
+            const resultCount = document.getElementById('resultCount');
+            const noResultsDiv = document.getElementById('noResults');
+            const resultsSection = document.getElementById('resultsSection');
+
+            resultsTableBody.innerHTML = '';
+
+            if (colleges.length === 0) {
+                noResultsDiv.classList.remove('hidden');
+                resultCount.textContent = '0 colleges';
+            } else {
+                playResultsSound();
+                noResultsDiv.classList.add('hidden');
+                resultCount.textContent = `${colleges.length} colleges found`;
+
+                colleges.forEach((college, index) => {
+                    const row = document.createElement('tr');
+                    row.className = 'table-row table-row-reveal';
+                    row.style.animationDelay = `${index * 50}ms`;
+                    
+                    let gapHtml = '-';
+// Add branch priority indicator
+const branchPriority = branchPriorityMap ? branchPriorityMap[college.Branch] : null;
+const priorityIndicator = branchPriority ? 
+    `<span class="category-badge border-purple-500 bg-purple-100 text-purple-800">Priority ${branchPriority}</span>` : '';
+                    if (studentRank) {
+                        const rankGap = parseInt(college['Merit Cutoff'] || college.MeritCutoff) - studentRank - 550;                        gapHtml = `<span class="category-badge border-green-500 bg-green-100 text-green-800">${rankGap >= 0 ? '+' : ''}${rankGap}</span>`;
+                    } else if (studentPercentile) {
+                        const percentileGap = studentPercentile - parseFloat(college.Percentile || college['Percentile']);                        gapHtml = `<span class="category-badge border-blue-500 bg-blue-100 text-blue-800">${percentileGap >= 0 ? '+' : ''}${percentileGap.toFixed(4)}</span>`;
+                    }
+
+                    row.innerHTML = `
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${index + 1}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">${college.College || '-'}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">
+        ${college.Branch || '-'}
+        ${priorityIndicator}
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">${college.City || '-'}</td>
+    <td class="px-6 py-4 whitespace-nowrap">
+        <span class="category-badge ${getCategoryClass(college.Category)}">${college.Category || '-'}</span>
+    </td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">${college.Percentile || '-'}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">${college['Merit Cutoff'] || '-'}</td>
+    <td class="px-6 py-4 whitespace-nowrap text-sm">${gapHtml}</td>
+`;
+                    resultsTableBody.appendChild(row);
+                });
+            }
+
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /**
+         * Exports results to Excel.
+         */
+        function exportToExcel() {
+            const table = document.querySelector("#resultsSection table");
+            if (!table || table.rows.length <= 1) {
+                alert('No data available to export.');
+                return;
+            }
+            const wb = XLSX.utils.table_to_book(table, { sheet: "College Predictions" });
+            XLSX.writeFile(wb, 'MHT-CET_College_Predictions.xlsx');
+        }
+        /**
+ * Manages branch preferences when branches are selected/deselected
+ */
+function updateBranchPreferences() {
+    const selectedBranches = $('#branch').val() || [];
+    const currentPreferences = branchPreferences.map(item => item.branch);
+    
+    // Add new branches
+    selectedBranches.forEach(branch => {
+        if (!currentPreferences.includes(branch)) {
+            branchPreferences.push({
+                branch: branch,
+                priority: branchPreferences.length + 1
+            });
+        }
+    });
+    
+    // Remove unselected branches
+    branchPreferences = branchPreferences.filter(item => 
+        selectedBranches.includes(item.branch)
+    );
+    
+    // Update priority numbers
+    branchPreferences.forEach((item, index) => {
+        item.priority = index + 1;
+    });
+    
+    renderBranchPreferences();
+}
+
+/**
+ * Renders the branch preferences in the UI
+ */
+function renderBranchPreferences() {
+    const container = document.getElementById('branchPreferences');
+    
+    if (branchPreferences.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-gray-500 dark:text-gray-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <p>Select branches from above to set your preference order</p>
+                <p class="text-sm">Drag to reorder or click to remove</p>
+            </div>
+        `;
+        return;
+    }
+    
+    container.innerHTML = branchPreferences.map((item, index) => `
+        <div class="branch-preference-item" draggable="true" data-index="${index}">
+            <span class="priority-number">${item.priority}</span>
+            <span class="branch-name">${item.branch}</span>
+            <span class="remove-btn" onclick="removeBranchPreference(${index})">×</span>
+        </div>
+    `).join('');
+    
+    setupDragAndDrop();
+}
+
+/**
+ * Removes a branch from preferences
+ */
+ function removeBranchPreference(index) {
+    const branchToRemove = branchPreferences[index]?.branch;
+    
+    // Remove from preferences array
+    branchPreferences.splice(index, 1);
+    
+    // Update priority numbers
+    branchPreferences.forEach((item, i) => {
+        item.priority = i + 1;
+    });
+    
+    // Remove from select2
+    if (branchToRemove) {
+        const currentValues = $('#branch').val() || [];
+        const newValues = currentValues.filter(b => b !== branchToRemove);
+        $('#branch').val(newValues);
+        $('#branch').trigger('change');
+    }
+    
+    renderBranchPreferences();
+}
+
+/**
+ * Sets up drag and drop functionality
+ */
+function setupDragAndDrop() {
+    const items = document.querySelectorAll('.branch-preference-item');
+    const container = document.getElementById('branchPreferences');
+    
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+    
+    container.addEventListener('dragover', handleDragOver);
+    container.addEventListener('drop', handleDrop);
+}
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.style.opacity = '0.5';
+    document.getElementById('branchPreferences').classList.add('dragging');
+}
+
+function handleDragEnd(e) {
+    this.style.opacity = '1';
+    document.getElementById('branchPreferences').classList.remove('dragging');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    if (draggedElement) {
+        const draggedIndex = parseInt(draggedElement.dataset.index);
+        const dropTarget = e.target.closest('.branch-preference-item');
+        
+        if (dropTarget && dropTarget !== draggedElement) {
+            const dropIndex = parseInt(dropTarget.dataset.index);
+            
+            // Reorder the array
+            const [movedItem] = branchPreferences.splice(draggedIndex, 1);
+            branchPreferences.splice(dropIndex, 0, movedItem);
+            
+            // Update priority numbers
+            branchPreferences.forEach((item, index) => {
+                item.priority = index + 1;
+            });
+            
+            renderBranchPreferences();
+        }
+    }
+}
+
+        // --- UI and Helper Functions ---
+        
+        function setupEventListeners() {
+            $('#branch').on('change', updateBranchPreferences);
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.getElementById('roundSelector').addEventListener('change', function() {
+                currentRound = this.value;
+                updateFormForCurrentRound();
+            });
+            document.getElementById('predictBtn').addEventListener('click', predictColleges);
+            document.getElementById('exportBtn').addEventListener('click', exportToExcel);
+            window.addEventListener('resize', initializeParticleBackground);
+        }
+
+        function initializeSelect2() {
+            $('#caste, #branch, #city').select2({ width: '100%' });
+        }
+
+        function initializeTheme() {
+            if (localStorage.getItem('theme') === 'dark' || 
+               (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.body.classList.add('dark-mode');
+            }
+            updateThemeIcons();
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            updateThemeIcons();
+            // Re-initialize background for new theme colors
+            initializeParticleBackground();
+        }
+        
+        function updateThemeIcons() {
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('theme-icon-light').classList.toggle('hidden', isDark);
+            document.getElementById('theme-icon-dark').classList.toggle('hidden', !isDark);
+        }
+
+        function initializeAudio() {
+            synth = new Tone.PolySynth(Tone.Synth, {
+                oscillator: { type: "fmsine" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.3, release: 1 },
+                volume: -10
+            }).toDestination();
+        }
+
+        function playResultsSound() {
+            if (Tone.context.state !== 'running') {
+                Tone.context.resume();
+            }
+            const now = Tone.now();
+            synth.triggerAttackRelease("C4", "8n", now);
+            synth.triggerAttackRelease("E4", "8n", now + 0.1);
+            synth.triggerAttackRelease("G4", "8n", now + 0.2);
+            synth.triggerAttackRelease("C5", "4n", now + 0.3);
+        }
+
+        function getCategoryClass(category) {
+            const categoryMap = {
+                'OPEN': 'border-blue-500 bg-blue-100 text-blue-800',
+                'OBC': 'border-purple-500 bg-purple-100 text-purple-800',
+                'SC': 'border-amber-500 bg-amber-100 text-amber-800',
+                'ST': 'border-red-500 bg-red-100 text-red-800',
+                'NT': 'border-green-500 bg-green-100 text-green-800',
+                'EWS': 'border-indigo-500 bg-indigo-100 text-indigo-800',
+                'SEBC': 'border-pink-500 bg-pink-100 text-pink-800',
+                'VJNT': 'border-orange-500 bg-orange-100 text-orange-800'
+            };
+            return categoryMap[category] || 'border-gray-500 bg-gray-100 text-gray-800';
+        }
+        
+        /**
+         * Initializes and animates the particle background.
+         */
+        function initializeParticleBackground() {
+            const canvas = document.getElementById('particle-canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            let particles = [];
+            const particleCount = 100;
+            const isDarkMode = document.body.classList.contains('dark-mode');
+
+            for (let i = 0; i < particleCount; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5 + 0.5,
+                    vx: (Math.random() - 0.5) * 0.5,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    color: isDarkMode ? 'rgba(250, 204, 21, 0.7)' : 'rgba(234, 179, 8, 0.7)'
+                });
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+
+                    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                });
+            }
+            animate();
+        }
+    </script>
+</body>
+</html>
